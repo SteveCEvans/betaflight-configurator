@@ -32,7 +32,11 @@ power.initialize = function (callback) {
     }
 
     function load_voltage_meters() {
-        MSP.send_message(MSPCodes.MSP_VOLTAGE_METERS, false, false, load_current_meters);
+        MSP.send_message(MSPCodes.MSP_VOLTAGE_METERS, false, false, load_motor_telemetry);
+    }
+
+    function load_motor_telemetry() {
+        MSP.send_message(MSPCodes.MSP_MOTOR_TELEMETRY, false, false, load_current_meters);
     }
 
     function load_current_meters() {
@@ -296,10 +300,14 @@ power.initialize = function (callback) {
         });
 
         function get_slow_data() {
-            MSP.send_message(MSPCodes.MSP_VOLTAGE_METERS, false, false, function () {
+            MSP.send_message(MSPCodes.MSP_MOTOR_TELEMETRY, false, false, function () {
                 for (let i = 0; i < FC.VOLTAGE_METERS.length; i++) {
                     const elementVoltageMeters = $(`#voltage-meter-${i} .value`);
-                    elementVoltageMeters.text(i18n.getMessage('powerVoltageValue', [FC.VOLTAGE_METERS[i].voltage]));
+                    if (FC.BATTERY_CONFIG.voltageMeterSource == 2 && FC.VOLTAGE_METERS[index].id >= 50) {
+                        elementVoltageMeters.text(i18n.getMessage('powerVoltageValue', [FC.MOTOR_TELEMETRY_DATA.voltage[i]]));
+                    } else {
+                        elementVoltageMeters.text(i18n.getMessage('powerVoltageValue', [FC.VOLTAGE_METERS[i].voltage]));
+                    }
                 }
             });
 
